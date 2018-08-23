@@ -8,8 +8,8 @@ library(caTools)
 library(dplyr)
 library(textstem)
 library(ngram)
-Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre-10.0.2')
-library(RWeka)
+#Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre-10.0.2')
+#library(RWeka)
 
 
 data$notNull<-ifelse(is.na(data$Title)==TRUE,0,1)
@@ -236,3 +236,9 @@ table(predictions>0.5,test$Recommended.IND)
 
 ##Accuracy increased by stacking models
 
+df<-data.frame(train,a=predictionsGLMtrain,b=predictionsGBMtrain,c=predictionsXGBoosttrain,d=predictionsctreetrain,output=train$Recommended.IND)
+trControl<-trainControl(method="cv",number = 5)
+modelnnet<-train(factor(output)~.,data=df,method="nnet",metric="Accuracy",preProcess=c("center","scale"),tuneLength=10,trControl=trControl)
+testdf<-data.frame(test,a=predictionsGLM,b=predictionsGBM,c=predictionsXGBoost,d=predictionsctree,output=test$Recommended.IND)
+predictions<-predict(modelnnet,testdf)
+print(table(predictions,test$Recommended.IND))
